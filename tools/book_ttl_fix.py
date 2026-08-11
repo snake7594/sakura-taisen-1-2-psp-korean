@@ -60,29 +60,48 @@ JOBS = [
     (6130, 6330, "カートリッジＲＡＭ", "카트리지 RAM"),
 ]
 
-def load():
+# H=96 구역. 32행짜리 같은 문구가 3벌 쌓여 있어 밴드마다 따로 그린다.
+JOBS96 = [
+    (7418, 7494, "追加シナリオ",   "추가 시나리오"),
+    (7496, 7548, "ＶＭサウンド",   "VM 사운드"),
+    # 왼쪽에 작은 한글 「사용 안 함」이 7815 까지 붙어 있다. 잉크가 이어져
+    # 있어 구간 검출로는 안 나뉘므로 확대해서 잰 값이다. 7806 부터 잡으면
+    # 「함」이 지워진다.
+    (7817, 7890, "記録9～16へ→",  "기록 9~16→"),
+    (7892, 7959, "記録1～8へ→",   "기록 1~8→"),
+    # 원문이 6자 60px 라 한글도 6자로 맞춘다. 띄어쓰기를 넣으면 글자가
+    # 작아져서 읽기 어렵다.
+    (7960, 8026, "戦闘中断記録",   "전투중단기록"),
+]
+
+def load(H=48):
     raw = open(SRC, 'rb').read()
     s2  = bytes(decompress(raw[SPLIT:])[0])
+    return raw, unpack(s2, H), len(s2)
+
+def unpack(s2, H):
     d   = np.frombuffer(s2, np.uint8)
     nib = np.stack([d >> 4, d & 15], 1).reshape(-1)
-    H = 48; cols = len(nib) // H
-    img = np.flipud(nib[:cols*H].reshape(cols, H).T)      # 사람이 보는 방향
-    return raw, img, len(s2)
+    cols = len(nib) // H
+    return np.flipud(nib[:cols*H].reshape(cols, H).T)     # 사람이 보는 방향
 
 def store(img, nbytes):
-    """load 의 역: flipud(img).T -> high-nibble-first 4bpp"""
+    """unpack 의 역: flipud(img).T -> high-nibble-first 4bpp.
+    높이를 무엇으로 잡든 정확한 역변환이라, H=48 로 고친 뒤 H=96 으로
+    다시 읽어 고치는 식으로 이어 붙일 수 있다."""
     flat = np.flipud(img).T.reshape(-1).astype(np.uint8)
     hi, lo = flat[0::2], flat[1::2]
     out = ((hi << 4) | lo).astype(np.uint8)
     return bytes(out) + b'\x00' * (nbytes - len(out))
 
-def draw(img, x0, x1, text):
-    box = img[:, x0:x1]
+def draw(img, x0, x1, text, y0=0, y1=None):
+    y1 = img.shape[0] if y1 is None else y1
+    box = img[y0:y1, x0:x1]
     vals = np.unique(box)
     ink = int(vals.max())                     # 글자는 가장 밝은 값
-    w, h = x1 - x0, 48
-    size = 40
-    while size > 12:
+    w, h = x1 - x0, y1 - y0
+    size = h - 8
+    while size > 8:
         f = ImageFont.truetype(FONT, size)
         b = f.getbbox(text)
         if b[2]-b[0] <= w-2 and b[3]-b[1] <= h-6: break
@@ -96,16 +115,24 @@ def draw(img, x0, x1, text):
     return ink, size
 
 def run(check_only=False):
-    raw, img, n2 = load()
-    print(f"  문자 레이어 {img.shape[1]:,} x {img.shape[0]}")
+    raw, img, n2 = load(48)
+    print(f"  H48 레이어 {img.shape[1]:,} x {img.shape[0]}")
     for x0, x1, ja, ko in JOBS:
         for p0, p1 in PROTECT:
             if x0 < p1 and p0 < x1:
                 raise RuntimeError(f"보존 구간 {p0}~{p1} 과 겹친다: {x0}~{x1}")
         ink, size = draw(img, x0, x1, ko)
         print(f"  x{x0}~{x1}  {ja} -> {ko}  (잉크 {ink}, {size}px)")
-
     s2 = store(img, n2)
+
+    # H=96 구역. 같은 바이트열을 다른 높이로 다시 읽어 이어서 고친다.
+    img96 = unpack(s2, 96)
+    print(f"  H96 레이어 {img96.shape[1]:,} x {img96.shape[0]}")
+    for x0, x1, ja, ko in JOBS96:
+        for b in range(3):                     # 보통/선택/강조 3벌
+            ink, size = draw(img96, x0, x1, ko, b*32, (b+1)*32)
+        print(f"  x{x0}~{x1}  {ja} -> {ko}  (3벌, 잉크 {ink}, {size}px)")
+    s2 = store(img96, n2)
     m, p, _, hl = parse_header(raw[SPLIT:])
     from cmp import _params
     ob, bi = _params(m, p)
