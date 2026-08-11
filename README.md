@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `78B5E7094F1574BD8AD5417E8A39AB2D` |
-| SHA1 | `C747F124D89F909B59BE8595A270807A8BDD323D` |
+| MD5 | `E76A2352878125743BF3205B90D305B5` |
+| SHA1 | `565C3B7DFDA37FBEBB2D7FE64E65423F67CA04C8` |
 
 이 값이 나오면 정상입니다.
 
@@ -93,9 +93,9 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
   나오는 대사에는 해당하지 않습니다.
 - **화 제목 영상**은 일본어 그대로입니다. 480×256 H.264 PMF 동영상이라
   재인코딩 + PSMF 리먹스가 필요한데 여유 용량이 사실상 없습니다.
-- **사쿠라2 메뉴책의 일부 부가 그래픽**은 일본어 원문 장식을 유지합니다.
-  책자형 시스템 파일 선택, 메모리 카드 선택, 클리어 기록 페이지와 저장
-  대화상자는 한글로 덧그렸습니다.
+- **사쿠라2 책 UI**(오늘의 일정 / 처음부터·불러오기·중단한 곳부터·옵션 /
+  환경 설정 / 세부 설정)는 한글로 나옵니다. 이전/다음 페이지 문구와 펜 커서는
+  별도 레이어라 일본어 원문을 유지합니다.
 - `SLGTAB.PFS` 는 개발용 애니메이션 표 라벨이라 화면에 안 나옵니다. 그대로 뒀습니다.
 
 ---
@@ -156,10 +156,10 @@ python tools/elf_text.py
 ELF 안의 하드코딩 문자열을 바꿉니다.
 
 ```bash
-python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py
+python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py
 ```
 
-메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면을 다시 그립니다.
+메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면, 책 UI 를 다시 그립니다.
 
 ```bash
 python tools/build_iso.py
@@ -284,6 +284,22 @@ pitchAlign 16 / heightAlign 8, 팔레트 RGBA8888. 즉 **PSP 스위즐은
 
 `.PVN` 은 타일 배치표입니다 — 32×32 타일, 격자 20×14 → 640×448,
 `0x28` 부터 u32 바이트 오프셋 280개.
+
+`PBOOKTTL.CMP` 는 **CMP 스트림이 두 개 이어 붙은** 파일입니다. 앞 스트림만
+풀면 종이 질감만 나와서 한동안 "글자가 없는 파일"로 잘못 판단했습니다.
+
+| 스트림 | 범위 | 내용 |
+|---|---|---|
+| 1 | 0x000000~0x035E7C (압축 220,797B → 754,176B) | 책 표지·종이 |
+| 2 | 0x035E7D~끝 (method0 param0 → 643,584B) | 문자 레이어 |
+
+문자 레이어는 **열 우선 + 상하 반전 + 4bpp high-nibble-first** 입니다.
+
+    nibble_offset = x*48 + (47 - y)
+    stored        = flipud(title).T
+
+보통의 row-major 로 읽으면 잡음으로만 보입니다. 자세한 건
+[tools/book_ttl.py](tools/book_ttl.py).
 
 ### ISO 빌드
 
