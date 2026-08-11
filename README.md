@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `DA39F62858D1A54E2BCE6B5C0CD9D73B` |
-| SHA1 | `FC84D57D6418DE1EDA0BB132AF932AE685F537BF` |
+| MD5 | `D3A01A720E736E91944EF4B9361170A7` |
+| SHA1 | `883049F0A8D5A60D1AD9ED1A9B25283FA1B5AD98` |
 
 이 값이 나오면 정상입니다.
 
@@ -94,7 +94,7 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 - **화 제목 영상**은 일본어 그대로입니다. 480×256 H.264 PMF 동영상이라
   재인코딩 + PSMF 리먹스가 필요한데 여유 용량이 사실상 없습니다.
 - **사쿠라2 책 UI**(오늘의 일정 / 처음부터·불러오기·중단한 곳부터·옵션 /
-  환경 설정 / 세부 설정)는 한글로 나옵니다. 이전/다음 페이지 문구와 펜 커서는
+  환경 설정 / 세부 설정 / 기록 일람)는 한글로 나옵니다. 이전/다음 페이지 문구와 펜 커서는
   별도 레이어라 일본어 원문을 유지합니다.
 - `SLGTAB.PFS` 는 개발용 애니메이션 표 라벨이라 화면에 안 나옵니다. 그대로 뒀습니다.
 
@@ -156,7 +156,7 @@ python tools/elf_text.py
 ELF 안의 하드코딩 문자열을 바꿉니다.
 
 ```bash
-python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py
+python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py
 ```
 
 메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면, 책 UI 를 다시 그립니다.
