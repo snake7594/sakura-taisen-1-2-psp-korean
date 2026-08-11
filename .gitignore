@@ -1,0 +1,28 @@
+# 게임 파일은 올리지 않는다
+# (git 은 줄 끝 주석을 안 받는다. 주석은 반드시 따로 줄에.)
+
+*.iso
+*.ISO
+*.cso
+
+# 원본 ISO 에서 뽑은 게임 파일
+extract/
+# 패치된 게임 파일
+build/
+# 게임 글꼴 이미지
+font_png/
+# 게임 이미지
+image_png/
+# 작업 중 확인용 렌더
+test_render/
+
+# 배포물은 릴리스로 올린다 (저장소에는 넣지 않는다)
+*.xdelta
+
+# 잡동사니
+__pycache__/
+*.pyc
+*.bak
+*.tmp
+Thumbs.db
+desktop.ini
