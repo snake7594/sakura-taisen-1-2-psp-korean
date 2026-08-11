@@ -36,12 +36,13 @@ md5sum "Sakura Taisen 1 and 2.iso"
 
 ## 2. 패치 적용
 
-[Releases](../../releases) 에서 `Sakura Taisen 1 and 2 (KR).xdelta` 를 받으세요.
+[Releases](../../releases) 에서 `Sakura.Taisen.1.and.2.KR.xdelta` 를 받으세요.
+(GitHub 이 파일명의 공백을 점으로 바꿉니다. 받은 이름 그대로 쓰시면 됩니다.)
 
 ### 방법 A — xdelta3 명령줄
 
 ```bash
-xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura Taisen 1 and 2 (KR).xdelta" "Sakura Taisen 1 and 2 (KR).iso"
+xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sakura Taisen 1 and 2 (KR).iso"
 ```
 
 `-s` 뒤가 **원본**, 그다음이 **패치 파일**, 마지막이 **만들어질 파일**입니다.
@@ -50,7 +51,7 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura Taisen 1 and 2 (KR).xdelta" "S
 ### 방법 B — xdeltaUI (그래픽)
 
 1. `Apply Patch` 탭 선택
-2. **Patch** : `Sakura Taisen 1 and 2 (KR).xdelta`
+2. **Patch** : `Sakura.Taisen.1.and.2.KR.xdelta`
 3. **Source File** : 원본 `Sakura Taisen 1 and 2.iso`
 4. **Output File** : 원하는 이름 (예: `사쿠라대전1_2 한글.iso`)
 5. `Apply` 클릭
