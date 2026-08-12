@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `CFC4B7FC109C141110CF42CC9309F9BC` |
-| SHA1 | `232AC0A5D8EBE4AA1E18F60149D9E29094D3623F` |
+| MD5 | `AA684E27D36985D43A3EEF752D1B3005` |
+| SHA1 | `544CDB96CCD39D2BA47C171871B0A9923E334903` |
 
 이 값이 나오면 정상입니다.
 
@@ -82,6 +82,7 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 | 시스템 문자열 | ELF 하드코딩 문자열 423개 (저장/불러오기, 타이틀, 옵션, 전투 명령, 사운드 테스트) |
 | 메뉴 이미지 | 명령 라벨, 화투 미니게임, 시스템 창, 사쿠라2 명령창·시작 화면, 책자형 파일 선택·클리어 기록 — 47장 |
 | 화 제목 | 사쿠라1 10화 전부 (`title1~10.spr`) |
+| 타이틀 화면 | 사쿠라1 — 간판(공연 / 제국화격단), 메뉴 라벨 5개<br>사쿠라2 — 게임 시작 / 사쿠라대전 1로 / 일러스트 감상 |
 | 지도 화면 | 사쿠라1 — 방 이름 표지판 63장, 오른쪽 세로 패널 26장<br>사쿠라2 — 장소 패널 20장 (제극 앞, 시부야, 아사쿠사 …), 영자갑주 명감 |
 | 미니게임 | `MG0000DAIF.BIN` 166개 문자열 |
 | 저장 대화상자 | 덮어쓸까요? / 저장할까요? / 복사할까요? / 지울까요? / 불러올까요? / 예 / 아니오 / 아이템 / 뒤로 |
@@ -161,7 +162,7 @@ python tools/elf_text.py
 ELF 안의 하드코딩 문자열을 바꿉니다.
 
 ```bash
-python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/place_gim.py && python tools/ep_title.py
+python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py
 ```
 
 메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면, 책 UI 를 다시 그립니다.
