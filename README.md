@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `2CF841CEBD866548A14113CCF92C64FB` |
-| SHA1 | `D1707467DB5E5374A03F671F00CB49568D48D399` |
+| MD5 | `1D5878AA1BCDEDF9E65ABE6D0B19D34C` |
+| SHA1 | `F77A1A7FBBB5578FA8C2680E89B8CD50D43A0485` |
 
 이 값이 나오면 정상입니다.
 

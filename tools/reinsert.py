@@ -47,11 +47,29 @@ def load_text():
 
 # ---------------------------------------------------------------- 사쿠라 1
 def build_tbl(orig, keyfmt, texts):
-    """tbl.bin 재구축. 같은 문장은 한 번만 저장해 공간을 아낀다."""
+    """tbl.bin 재구축. 같은 문장은 한 번만 저장해 공간을 아낀다.
+
+    **텍스트 뒤에 딸린 자료를 반드시 원래 자리에 그대로 둬야 한다.**
+    처음에는 헤더+표+텍스트만 새로 쓰고 나머지를 버렸는데, 그 뒤에
+    립싱크 음소 열(`.ea.aeeennnnnn` 같은 a/e/i/o/u/n 문자열)이 들어 있다.
+    이걸 날리면 **사쿠라1 음성이 하나도 안 나오고**, 게임이 그 자리를
+    읽으려다 장면 전환에서 멈춘다. 0100tbl.bin 기준 14,669 바이트다.
+
+    그래서 원본에서 마지막 문장이 끝나는 자리를 찾아 그 뒤를 꼬리로 떼어
+    두고, 새 텍스트는 그 앞까지만 채운 뒤 꼬리를 **같은 절대 위치**에 붙인다.
+    """
     words = struct.unpack_from('>H', orig, 0)[0]
     n = words // 2
     unk = struct.unpack_from('>H', orig, 2)[0]
     ids = [struct.unpack_from('>HH', orig, 4 + k*4)[0] for k in range(n)]
+
+    # 원본 꼬리 잘라내기: 가장 뒤쪽 문장의 NUL 다음부터 파일 끝까지
+    base0 = 4 + n*4
+    o_offs = [struct.unpack_from('>HH', orig, 4 + k*4)[1] for k in range(n)]
+    last = base0 + max(o_offs)*2
+    tail_at = orig.find(b'\x00', last) + 1 if last < len(orig) else len(orig)
+    if tail_at <= 0: tail_at = len(orig)
+    tail = orig[tail_at:]
 
     blob, pos = bytearray(), {}
     offs = []
@@ -74,7 +92,13 @@ def build_tbl(orig, keyfmt, texts):
     for i, o in zip(ids, offs):
         out += struct.pack('>HH', i, o // 2)
     assert len(out) == base
-    return bytes(out + blob)
+    out += blob
+    if tail:
+        if len(out) > tail_at:
+            raise EncodeError(f"번역문이 원본 텍스트 구역({tail_at-base:,}B)을 넘어 "
+                              f"립싱크 자료를 밀어낸다 ({len(out)-base:,}B)")
+        out = bytearray(bytes(out).ljust(tail_at, b'\x00')) + tail
+    return bytes(out)
 
 def build_pfs(src_path, member_filter, keyprefix, texts, report):
     d = open(src_path, 'rb').read()
