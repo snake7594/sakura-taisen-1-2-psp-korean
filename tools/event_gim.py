@@ -12,25 +12,21 @@ EVENT##_#.GIM 은 PLACE 와 같은 132x230 INDEX8 스위즐 GIM 이다. 아래�
 파일마다 조합이 달라서 45장을 하나씩 눈으로 읽어 표로 적었다. 자동으로
 뽑을 방법이 없고, 잘못 짝지으면 엉뚱한 적 이름이 박힌다.
 
-**아직 완성이 아니다 — 빌드에 넣지 말 것.**
+배경 채우기는 **상자 안에서 글자를 찾아 그 픽셀만 확산으로 메운다**.
+고정된 상자에서 테두리 색을 보간하는 방식은 두 번 실패했다.
 
-배경 채우기가 안 끝났다. 두 가지를 해 봤다.
+  1) 위·아래 행을 세로로 보간 -> 그 행이 상자 테두리라 붉은 띠가 생겼다.
+  2) 좌우 열을 가로로 보간 -> 원문이 상자 끝까지 뻗은 패널
+     (「闇神威・叉丹」「大日剣・金剛」)에서 표본 열에 원문 픽셀이 들어가
+     잔재와 가로 줄무늬가 남았다.
 
-  1) 상자 위·아래 행을 세로로 보간 -> 그 행이 상자 테두리라 안쪽과 색이
-     달라 붉은 띠가 생겼다.
-  2) 상자 좌우 열을 가로로 보간 -> 색은 맞는데, 원문이 상자 끝까지 뻗은
-     패널(「闇神威・叉丹」「大日剣・金剛」)에서는 표본 열 자체에 원문
-     픽셀이 들어가 잔재가 남고 가로 줄무늬가 생긴다.
-
-고정된 상자로는 안 된다. ep_title.py 처럼 **상자 안에서 글자를 찾아 그
-픽셀만 확산으로 메우는** 방식으로 바꿔야 한다. 상자 배경이 매끈한
-그라데이션이라 확산이 잘 들어맞을 것이다.
-
-번역표(EV/PLACE/FOE)는 45장을 눈으로 읽어 확정한 것이라 그대로 쓰면 된다.
+확산은 원문이 어디까지 뻗었는지 몰라도 되고, 상자 배경이 매끈한
+그라데이션이라 잘 들어맞는다. 다만 인덱스 이미지라 **RGB 로 메운 뒤
+원래 팔레트에서 가장 가까운 색으로 되돌린다**.
 """
 import os, sys, struct
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -41,8 +37,8 @@ import place_gim as PG
 FONT  = os.path.join(ROOT, "NanumSquareNeo-cBd.ttf")
 BUILD = os.path.join(ROOT, "build", "patched")
 
-L1 = (14, 171, 118, 197)      # 장소명
-L2 = (14, 197, 118, 223)      # 적 이름
+L1 = (6, 170, 126, 197)      # 장소명
+L2 = (6, 197, 126, 224)      # 적 이름
 
 PLACE = {
     "帝劇前": "제극 앞", "鶯谷": "우구이스다니", "渋谷": "시부야",
@@ -91,32 +87,59 @@ EV = {
  'EVENT12_1':("御柱の間","京極慶吾"),    'EVENT12_2':("最終決戦","新皇・京極慶吾"),
 }
 
-def fill_v(img, pal, box):
-    """상자 좌우 바깥 열을 **가로로** 보간해 배경을 만든다.
+def quant(rgb, pal):
+    """RGB -> 원래 팔레트에서 가장 가까운 인덱스."""
+    P = pal[:, :3].astype(np.int32)
+    flat = rgb.reshape(-1, 3).astype(np.int32)
+    d = ((flat[:, None, :] - P[None, :, :])**2).sum(-1)
+    return d.argmin(1).astype(np.uint8).reshape(rgb.shape[:2])
 
-    처음에는 위·아래 행을 세로로 섞었는데, 그 행들이 상자의 테두리라
-    안쪽과 색이 달라 붉은 띠가 생겼다. 상자 배경은 행마다 색이 변하는
-    가로 그라데이션이라, 같은 행의 좌우 여백에서 떠 와야 맞는다.
-    RGB 로 섞고 가장 가까운 팔레트 색으로 되돌린다."""
-    x0, y0, x1, y1 = box
-    prgb = pal[:, :3].astype(np.float64)
-    L = prgb[img[y0:y1, max(0, x0-4)]]
-    R = prgb[img[y0:y1, min(img.shape[1]-1, x1+3)]]
-    tt = np.linspace(0, 1, x1-x0)[None, :, None]
-    mix = L[:, None, :]*(1-tt) + R[:, None, :]*tt
-    d = ((mix[:, :, None, :] - prgb[None, None, :, :])**2).sum(-1)
-    return d.argmin(-1).astype(np.uint8)
+def glyph_mask(rgb):
+    """상자 안에서 원문 글자를 찾는다.
+
+    상자 배경은 매끈한 그라데이션이고 글자는 윤곽이 날카롭다. 중앙값
+    필터를 씌운 것과의 차이가 큰 자리가 글자다. ep_title.py 와 같은
+    방식이고, 거기서 배운 대로 **속을 찾고 넉넉히 부풀린다** — 어두운
+    테두리는 대비가 약해 못 찾아도 부풀림에 들어온다."""
+    g = Image.fromarray(rgb).convert('L')
+    med = np.asarray(g.filter(ImageFilter.MedianFilter(7))).astype(int)
+    d = np.abs(np.asarray(g).astype(int) - med)
+    core = Image.fromarray((d > 22).astype(np.uint8)*255)
+    return np.asarray(core.filter(ImageFilter.MaxFilter(7))) > 0
+
+def inpaint(rgb, mask, rounds=80):
+    """글자 자리를 둘레 색으로 스며들게 메운다."""
+    img = rgb.astype(np.float32).copy()
+    img[mask] = np.nan
+    for _ in range(rounds):
+        p4 = np.stack([np.roll(img, 1, 0), np.roll(img, -1, 0),
+                       np.roll(img, 1, 1), np.roll(img, -1, 1)])
+        with np.errstate(invalid='ignore'):
+            mean = np.nanmean(p4, axis=0)
+        fill = np.isnan(img) & ~np.isnan(mean)
+        if not fill.any(): break
+        img[fill] = mean[fill]
+    # 그래도 남으면 그 행의 평균으로
+    if np.isnan(img).any():
+        rowmean = np.nanmean(img, axis=1, keepdims=True)
+        rowmean = np.nan_to_num(rowmean, nan=float(np.nanmean(img)))
+        img = np.where(np.isnan(img), np.broadcast_to(rowmean, img.shape), img)
+    return np.clip(img, 0, 255).astype(np.uint8)
 
 def draw_line(img, pal, box, text, lum):
     x0, y0, x1, y1 = box
     reg = img[y0:y1, x0:x1]
-    bg = fill_v(img, pal, box)
-    bglum = float(lum[bg].mean())
-    ink = int(max(np.unique(reg), key=lambda v: abs(lum[v]-bglum)))
+    rgb = pal[reg][:, :, :3].astype(np.uint8)
+    m = glyph_mask(rgb)
+    # 잉크: 글자로 찾은 자리에서 배경 휘도와 가장 먼 색
+    bgl = float(lum[reg[~m]].mean()) if (~m).any() else 0.0
+    cand = np.unique(reg[m]) if m.any() else np.unique(reg)
+    ink = int(max(cand, key=lambda v: abs(lum[v]-bgl)))
+    bg = quant(inpaint(rgb, m), pal)
     w, h = x1-x0, y1-y0
     size = h - 2
+    mk = Image.new('L', (w, h), 0); dr = ImageDraw.Draw(mk)
     f = ImageFont.truetype(FONT, size)
-    m = Image.new('L', (w, h), 0); dr = ImageDraw.Draw(m)
     while size > 7:
         f = ImageFont.truetype(FONT, size)
         b = dr.textbbox((0, 0), text, font=f)
@@ -124,7 +147,7 @@ def draw_line(img, pal, box, text, lum):
         size -= 1
     b = dr.textbbox((0, 0), text, font=f)
     dr.text(((w-(b[2]-b[0]))//2 - b[0], (h-(b[3]-b[1]))//2 - b[1]), text, font=f, fill=255)
-    a = np.asarray(m)
+    a = np.asarray(mk)
     img[y0:y1, x0:x1] = np.where(a >= 128, ink, bg).astype(np.uint8)
     return ink, size
 

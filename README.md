@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `AA684E27D36985D43A3EEF752D1B3005` |
-| SHA1 | `544CDB96CCD39D2BA47C171871B0A9923E334903` |
+| MD5 | `47BDB8A06CB433A02B600C4598190582` |
+| SHA1 | `1D948B257DDE8E917AEB6BA16DB387B7B0116D07` |
 
 이 값이 나오면 정상입니다.
 
@@ -84,6 +84,7 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 | 화 제목 | 사쿠라1 10화 전부 (`title1~10.spr`) |
 | 타이틀 화면 | 사쿠라1 — 간판(공연 / 제국화격단), 메뉴 라벨 5개<br>사쿠라2 — 게임 시작 / 사쿠라대전 1로 / 일러스트 감상 |
 | 지도 화면 | 사쿠라1 — 방 이름 표지판 63장, 오른쪽 세로 패널 26장<br>사쿠라2 — 장소 패널 20장 (제극 앞, 시부야, 아사쿠사 …), 영자갑주 명감 |
+| 전투 도입 | 사쿠라2 — 장소명 + 적 이름 45장 (`EVENT##_#.GIM`) |
 | 미니게임 | `MG0000DAIF.BIN` 166개 문자열 |
 | 저장 대화상자 | 덮어쓸까요? / 저장할까요? / 복사할까요? / 지울까요? / 불러올까요? / 예 / 아니오 / 아이템 / 뒤로 |
 | 글꼴 | 나눔스퀘어네오 Bold 를 완성형 2350자로 삽입 |
@@ -99,9 +100,7 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
   환경 설정 / 세부 설정 / 기록 일람 / 본체·카트리지 RAM /
   추가 시나리오 / VM 사운드 / 기록 이동 / 전투중단기록)는 한글로 나옵니다. 이전/다음 페이지 문구와 펜 커서는
   별도 레이어라 일본어 원문을 유지합니다.
-- **사쿠라2 의 전투 도입 패널(`EVENT##_#.GIM` 45장)과 키네마트론 조작 설명
-  (`KINEMA.GIM`)은 아직 일본어입니다.** 전투 패널은 장소명 + 적 이름 2줄로
-  되어 있고, 적 이름이 고유명사라 45장 전부의 대응표를 만들어야 합니다.
+- **키네마트론 조작 설명(`KINEMA.GIM`)** 은 아직 일본어입니다.
 - `SLGTAB.PFS` 는 개발용 애니메이션 표 라벨이라 화면에 안 나옵니다. 그대로 뒀습니다.
 
 ---
@@ -162,7 +161,7 @@ python tools/elf_text.py
 ELF 안의 하드코딩 문자열을 바꿉니다.
 
 ```bash
-python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py
+python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py && python tools/event_gim.py
 ```
 
 메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면, 책 UI 를 다시 그립니다.
