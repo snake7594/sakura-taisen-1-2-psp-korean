@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `1D5878AA1BCDEDF9E65ABE6D0B19D34C` |
-| SHA1 | `F77A1A7FBBB5578FA8C2680E89B8CD50D43A0485` |
+| MD5 | `04E873A15470748C5AB9480FE41754D5` |
+| SHA1 | `FF2C4918F3B8CCA0F5372A32678B23E1BB53FA18` |
 
 이 값이 나오면 정상입니다.
 
@@ -195,6 +195,19 @@ python tools/check_translation.py
 | `mg_daif.tsv` | 미니게임 (`MG0000DAIF.BIN`) |
 | `elf_sakura1.tsv` / `elf_sakura2.tsv` | ELF 하드코딩 문자열 |
 
+### 고유명사
+
+`tools/glossary.py` 가 사쿠라대전 용어를 통일합니다. 새 번역을 넣은 뒤
+한 번 돌려 주세요.
+
+| 잘못 | 바름 | 원문 |
+|---|---|---|
+| 마미야지 | **신구지** | 真宮寺 — 한 자씩 읽어 생긴 오류 |
+| 오가미 | **오오가미** | 大神 |
+| 이리스 | **아이리스** | アイリス |
+| 꽃조 | **화조** | 花組 |
+| 코부 | **광무** | 光武 |
+
 ### 지켜야 할 제약
 
 **글자 수 제한이 있습니다.** 글자 폭이 고정(한 칸에 한 글자)이라
@@ -218,7 +231,7 @@ ELF 문자열은 **원래 바이트 수를 넘으면 안 됩니다.** `maxbytes`
 고친 뒤:
 
 ```bash
-python tools/fix_chars.py && python tools/check_translation.py
+python tools/fix_chars.py && python tools/glossary.py && python tools/check_translation.py
 ```
 
 ---
