@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""사쿠라대전 2 전투 도입 패널 45장과 키네마트론 조작 설명을 한글로 바꾼다.
+"""사쿠라대전 2 전투 도입 패널 45장과 키네마트론 조작 설명(KINEMA.GIM)을 한글로 바꾼다.
 
   python tools/event_gim.py --check --png
   python tools/event_gim.py
@@ -151,6 +151,49 @@ def draw_line(img, pal, box, text, lum):
     img[y0:y1, x0:x1] = np.where(a >= 128, ink, bg).astype(np.uint8)
     return ink, size
 
+# KINEMA.GIM (138x256) — 키네마트론 조작 설명. 상자는 (x0,y0,x1,y1).
+# 왼쪽의 십자키·○·△ 표시는 그대로 두고 글자만 바꾼다.
+# 상자는 **서로 겹치면 안 된다.** img 를 제자리에서 고치므로 겹치면 앞에
+# 그린 한글이 다음 상자의 '원문 글자'로 잡혀 통째로 지워지고 어두워진다.
+KINEMA = [
+    ((14,  26, 128,  47), "키네마트론"),
+    ((22,  47, 118,  70), "조작 설명"),
+    ((40,  86, 132, 108), "다이얼 돌리기"),
+    ((40, 122, 134, 140), "[통신 버튼]"),
+    ((40, 141, 134, 158), "[단축 다이얼]"),
+    ((40, 159, 134, 176), "[전원 버튼]"),
+    ((40, 177, 108, 194), "선택"),
+    ((40, 196, 108, 215), "결정"),
+    ((40, 217, 134, 237), "주소록 표시"),
+]
+
+def run_kinema(check_only=False, make_png=False):
+    f = open(SRC_ISO, 'rb'); t = walk_iso(f)
+    p = [x for x in t if x.upper().endswith('/KINEMA.GIM')][0]
+    _, lba, sz = t[p]; f.seek(lba*SECTOR); d = bytearray(f.read(sz)); f.close()
+    (po, w, h, order), palo = PG.gim_image(bytes(d))
+    pitch = (w+15)//16*16; hh = (h+7)//8*8
+    buf = np.frombuffer(bytes(d[po:po+pitch*hh]), np.uint8)
+    img = (PG.unswz(buf, pitch, hh) if order else buf.reshape(hh, pitch)).copy()
+    pal = np.frombuffer(bytes(d[palo:palo+1024]), np.uint8).reshape(256, 4)
+    lum = pal[:, :3].astype(int).sum(1)
+    before = pal[img[:h, :w]][:, :, :3].astype('uint8').copy()
+    for box, ko in KINEMA:
+        bx = (box[0], box[1], min(box[2], w), box[3])
+        ink, size = draw_line(img, pal, bx, ko, lum)
+        print(f"  KINEMA {bx} -> {ko}  (잉크 {ink}, {size}px)")
+    d[po:po+pitch*hh] = (PG.swz(img) if order else img.reshape(-1)).tobytes()
+    if make_png:
+        a = Image.fromarray(before); b = Image.fromarray(pal[img[:h, :w]][:, :, :3].astype('uint8'))
+        sh = Image.new('RGB', (2*(w+4), h), (30, 30, 30))
+        sh.paste(a, (0, 0)); sh.paste(b, (w+4, 0))
+        q = os.path.join(ROOT, "test_render", "_kinema_ko.png"); sh.save(q)
+        print(f"      -> {q}")
+    if not check_only:
+        os.makedirs(BUILD, exist_ok=True)
+        q = os.path.join(BUILD, "KINEMA.GIM"); open(q, 'wb').write(bytes(d))
+        print(f"      -> {q}")
+
 def run(check_only=False, make_png=False):
     f = open(SRC_ISO, 'rb'); t = walk_iso(f)
     ps = [p for p in sorted(t) if os.path.basename(p)[:-4] in EV and p.upper().endswith('.GIM')]
@@ -190,3 +233,4 @@ def run(check_only=False, make_png=False):
 if __name__ == '__main__':
     sys.stdout = __import__('io').TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     run('--check' in sys.argv, '--png' in sys.argv)
+    run_kinema('--check' in sys.argv, '--png' in sys.argv)
