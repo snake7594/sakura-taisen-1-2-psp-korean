@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `04E873A15470748C5AB9480FE41754D5` |
-| SHA1 | `FF2C4918F3B8CCA0F5372A32678B23E1BB53FA18` |
+| MD5 | `CFC4B7FC109C141110CF42CC9309F9BC` |
+| SHA1 | `232AC0A5D8EBE4AA1E18F60149D9E29094D3623F` |
 
 이 값이 나오면 정상입니다.
 
@@ -81,6 +81,7 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 | 대사 | 사쿠라1·2 본편, 이벤트, SLG 전투 파트, 미니게임 — 86,376행 |
 | 시스템 문자열 | ELF 하드코딩 문자열 423개 (저장/불러오기, 타이틀, 옵션, 전투 명령, 사운드 테스트) |
 | 메뉴 이미지 | 명령 라벨, 화투 미니게임, 시스템 창, 사쿠라2 명령창·시작 화면, 책자형 파일 선택·클리어 기록 — 47장 |
+| 화 제목 | 사쿠라1 10화 전부 (`title1~10.spr`) |
 | 지도 화면 | 사쿠라1 — 방 이름 표지판 63장, 오른쪽 세로 패널 26장<br>사쿠라2 — 장소 패널 20장 (제극 앞, 시부야, 아사쿠사 …), 영자갑주 명감 |
 | 미니게임 | `MG0000DAIF.BIN` 166개 문자열 |
 | 저장 대화상자 | 덮어쓸까요? / 저장할까요? / 복사할까요? / 지울까요? / 불러올까요? / 예 / 아니오 / 아이템 / 뒤로 |
@@ -91,8 +92,8 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 - **일부 자산 이름에 한자가 남아 있으면 엉뚱한 한글로 보입니다.** 글꼴을
   JIS 1수준 한자 자리(ku16~ku40)에 한글로 덮어썼기 때문입니다. 화면에
   나오는 대사에는 해당하지 않습니다.
-- **화 제목 영상**은 일본어 그대로입니다. 480×256 H.264 PMF 동영상이라
-  재인코딩 + PSMF 리먹스가 필요한데 여유 용량이 사실상 없습니다.
+- **화 제목** — 사쿠라1 은 한글입니다 (10장). 사쿠라2 는 H.264 PMF 동영상이라
+  재인코딩 + PSMF 리먹스가 필요하고 여유 용량이 없어 일본어로 남습니다.
 - **사쿠라2 책 UI**(오늘의 일정 / 처음부터·불러오기·중단한 곳부터·옵션 /
   환경 설정 / 세부 설정 / 기록 일람 / 본체·카트리지 RAM /
   추가 시나리오 / VM 사운드 / 기록 이동 / 전투중단기록)는 한글로 나옵니다. 이전/다음 페이지 문구와 펜 커서는
@@ -160,7 +161,7 @@ python tools/elf_text.py
 ELF 안의 하드코딩 문자열을 바꿉니다.
 
 ```bash
-python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/place_gim.py
+python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/place_gim.py && python tools/ep_title.py
 ```
 
 메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면, 책 UI 를 다시 그립니다.
