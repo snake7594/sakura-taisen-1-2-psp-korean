@@ -42,7 +42,17 @@ KO = {
     "PLACE11_0": "미카사 기관부","PLACE11_1": "미카사 갑판",
     "PLACE11_2": "무사시 내부", "PLACE12_0": "이드의 방",
     "PLACE12_1": "미하시라의 방","PLACE12_2": "신황의 방",
+    # 같은 132x230 세로 패널. 다만 밝은 바탕에 어두운 글자라 잉크가 반대다.
+    # 글자가 x52~86 에만 있어서 상자를 거기에 맞춘다. 넓게 잡으면 멀쩡한
+    # 배경까지 보간으로 덮어 원형 무늬가 뭉개진다.
+    "MEIKAN":    ("영자갑주 명감", (51, 14, 88, 218), (48, 89)),
 }
+
+def job(stem):
+    """(번역문, 상자, 배경표본열) — 안 적은 것은 기본값"""
+    v = KO[stem]
+    if not isinstance(v, tuple): return v, BOX, BGX
+    return (v + (BGX,))[:3] if len(v) == 2 else v
 
 def gim_image(d):
     """(픽셀데이터 오프셋, w, h, 스위즐, 팔레트오프셋) — 첫 이미지 청크"""
@@ -84,7 +94,7 @@ def vtext(text, w, h):
                  int(i*step + (step - (b[3]-b[1]))//2) - b[1]), c, font=f, fill=255)
     return np.asarray(m)
 
-def patch(d, ko):
+def patch(d, ko, BOX=BOX, BGX=BGX):
     d = bytearray(d)
     (po, w, h, order), palo = gim_image(bytes(d))
     pitch = (w + 15)//16*16; hh = (h + 7)//8*8
@@ -96,10 +106,22 @@ def patch(d, ko):
 
     x0, y0, x1, y1 = BOX
     reg = img[y0:y1, x0:x1]
-    ink = int(max(np.unique(reg), key=lambda v: lum[v]))     # 가장 밝은 색이 글자
-
-    # 배경: 띠 안쪽이면서 글자가 안 닿는 열에서 그 행의 값을 가져온다
-    bg = img[y0:y1, BGX[0]][:, None].repeat(x1-x0, 1)
+    # 배경 복원. 글자 좌우 바깥쪽 두 열을 가로로 보간해 채운다.
+    # **보간은 RGB 로 해야 한다** — 팔레트 인덱스는 색 순서가 아니라서
+    # 인덱스끼리 섞으면 엉뚱한 색이 나온다. 섞은 뒤 가장 가까운 팔레트
+    # 색으로 되돌린다. 한 열만 복사하면 그 열 무늬가 가로로 늘어져
+    # 줄무늬가 생긴다 (MEIKAN 의 원형 무늬에서 눈에 띈다).
+    prgb = pal[:, :3].astype(np.float64)
+    L = prgb[img[y0:y1, BGX[0]]]                     # (행, 3)
+    R = prgb[img[y0:y1, BGX[1]]]
+    tt = np.linspace(0, 1, x1-x0)[None, :, None]
+    mix = L[:, None, :]*(1-tt) + R[:, None, :]*tt    # (행, 폭, 3)
+    dist = ((mix[:, :, None, :] - prgb[None, None, :, :])**2).sum(-1)
+    bg = dist.argmin(-1).astype(np.uint8)
+    # 잉크는 **배경에서 가장 먼 색**. 어두운 바탕이면 흰 글자, 밝은 바탕이면
+    # 검은 글자라서 '가장 밝은 색'으로 고정하면 MEIKAN 에서 틀린다.
+    bglum = float(lum[bg].mean())
+    ink = int(max(np.unique(reg), key=lambda v: abs(lum[v]-bglum)))
     m = vtext(ko, x1-x0, y1-y0)
     out = np.where(m >= 128, ink, bg).astype(np.uint8)
     img[y0:y1, x0:x1] = out
@@ -109,16 +131,17 @@ def patch(d, ko):
 
 def run(check_only=False, make_png=False):
     f = open(SRC_ISO, 'rb'); t = walk_iso(f)
-    ps = [p for p in sorted(t) if 'PLACE' in p.upper() and p.upper().endswith('.GIM')]
+    ps = [p for p in sorted(t) if p.upper().endswith('.GIM') and os.path.basename(p)[:-4] in KO]
     os.makedirs(BUILD, exist_ok=True)
     prev = []
     for p in ps:
         nm = os.path.basename(p); stem = nm[:-4]
         if stem not in KO: print(f"  {nm}: 번역 없음 — 건너뜀"); continue
+        ko, box, bgx = job(stem)
         _, lba, sz = t[p]; f.seek(lba*SECTOR); d = f.read(sz)
-        nd, ink = patch(d, KO[stem])
+        nd, ink = patch(d, ko, box, bgx)
         assert len(nd) == len(d), "크기가 변하면 안 된다"
-        print(f"  {nm:<16} -> {KO[stem]}  (잉크 {ink})")
+        print(f"  {nm:<16} -> {ko}  (잉크 {ink})")
         if make_png:
             import gim
             w, h, _, a = gim.decode(nd)[0]
