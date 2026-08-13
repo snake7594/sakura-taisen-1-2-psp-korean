@@ -67,6 +67,13 @@ def set_size(f, rec_off, size):
     f.write(struct.pack('<I', size) + struct.pack('>I', size))
 
 # ---------------------------------------------------------------- 교체 목록
+# ISO 안에 같은 이름이 여러 개 있어도 **모두 같은 내용으로 덮어쓸** 파일들.
+# 기본은 이름이 겹치면 멈추는 것이 맞다 — 어느 쪽을 고칠지 모르는 채로
+# 아무 데나 쓰면 안 되니까. 아래 파일은 원본에서 사본끼리 바이트가 같고
+# (SAKURA1/ 과 SAKURA2/) 게임이 상황에 따라 둘 중 하나를 읽으므로
+# 양쪽 다 바꿔야 한다.
+MULTI_PATH = {"PBOOK_FLB0.CMP"}
+
 def from_dir(table, subdir, label, pattern=None):
     """build/<subdir>/ 의 파일을 ISO 안 같은 이름 파일에 자동으로 매칭한다."""
     d = os.path.join(BUILD, subdir)
@@ -80,6 +87,9 @@ def from_dir(table, subdir, label, pattern=None):
         c = by_name.get(fn, [])
         if len(c) == 1: out[c[0]] = os.path.join(d, fn)
         elif not c:     miss.append(fn)
+        elif fn in MULTI_PATH:
+            for q in c: out[q] = os.path.join(d, fn)
+            print(f"    {label}: '{fn}' 을 {len(c)}곳에 씀 {c}")
         else:           amb.append((fn, c))
     if miss:
         print(f"    주의 [{label}] ISO 에 없는 이름 {len(miss)}개 무시: {miss[:4]}")
