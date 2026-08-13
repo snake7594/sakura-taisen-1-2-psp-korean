@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `24CBD49C248B21D1C35DF374A052411D` |
-| SHA1 | `780C2FA43FFDD43F67F2295C8026BB6159A297F5` |
+| MD5 | `7597B71E5AEE633CD7B620EC860BE29B` |
+| SHA1 | `F86EB232078DEC77D023DDB993BAE1EE3CC15A1F` |
 
 이 값이 나오면 정상입니다.
 
@@ -87,6 +87,7 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 | 전투 도입 | 사쿠라2 — 장소명 + 적 이름 45장 (`EVENT##_#.GIM`) |
 | 키네마트론 | 조작 설명 (`KINEMA.GIM`) |
 | 책 UI 페이지 이동 | 이전 페이지 / 다음 페이지 (`PBOOK_FLB0.CMP`) |
+| 책 UI 문자 레이어 | 키 설정·조작 설정, 전투 명령 14개, 파일 메뉴, 상연 시간,<br>화 번호 24개, 화 제목·부제 12편, 전투 지점 이름 86낱말 (`PBOOKTTL.CMP`) |
 | 미니게임 | `MG0000DAIF.BIN` 166개 문자열 |
 | 저장 대화상자 | PSP 세이브 유틸리티 문구 — 새 저장 파일 만들기 / 공간 확보를 위해 저장 데이터를 지울까요? / 덮어쓰기 경고문 |
 | 전투 지점 이름 | 중단 기록에 뜨는 58곳 (제극 첫출전, 우구이 대일검전, 무사시 암신위 …) |
@@ -103,10 +104,10 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
   환경 설정 / 세부 설정 / 기록 일람 / 본체·카트리지 RAM /
   추가 시나리오 / VM 사운드 / 기록 이동 / 전투중단기록 /
   이전 페이지·다음 페이지)는 한글로 나옵니다. 펜 커서는 그림이라 그대로 뒀습니다.
-- **책 UI 문자 레이어에 아직 일본어가 남아 있습니다.** `PBOOKTTL.CMP` 의
-  두 번째 스트림은 26,816칸짜리 긴 띠인데 앞쪽만 한글로 바꿨습니다.
-  키 설정·조작 설명, 전투 명령 라벨, 전투 지점 이름 58곳, 화 제목 부제가
-  아직 일본어입니다. 자리와 읽는 법은 아래 6장에 적어 뒀습니다.
+- 책 UI 문자 레이어(`PBOOKTTL.CMP` 두 번째 스트림, 26,816칸)는 전부 한글입니다.
+  다만 **지명은 자리가 좁아 줄여 썼습니다** — 원문 한자 두 자 자리(21px)에
+  한글 세 자를 넣어야 해서 「우구이(鴬谷) 후카가(深川) 이케부(池袋)」 처럼
+  됩니다. 원문 한자도 같은 크기의 잔글씨입니다.
 - `SLGTAB.PFS` 는 개발용 애니메이션 표 라벨이라 화면에 안 나옵니다. 그대로 뒀습니다.
 - **ISO 안에는 게임이 절대 읽지 않는 자산이 섞여 있습니다.** 아래 5개는
   파일 이름이 ISO 어디에도 안 나옵니다 — 드림캐스트판·3편에서 넘어온
@@ -178,7 +179,7 @@ python tools/elf_text.py
 ELF 안의 하드코딩 문자열을 바꿉니다.
 
 ```bash
-python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/book_page_nav.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py && python tools/event_gim.py
+python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/book_ttl_more.py && python tools/book_page_nav.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py && python tools/event_gim.py
 ```
 
 메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면, 책 UI 를 다시 그립니다.
@@ -375,28 +376,37 @@ LZSS 가 잡을 반복이 줄어듭니다. 안티에일리어싱 단계를 줄�
 
 4단계면 이 크기에서 눈으로 구분이 안 됩니다.
 
-### 아직 일본어인 곳 — PBOOKTTL 스트림2 뒤쪽
+### PBOOKTTL 문자 레이어 — 높이가 구역마다 다르다
 
-`tools/book_ttl_fix.py` 의 `load(H)` 로 띠 전체를 그림으로 볼 수 있습니다.
+띠 전체를 그림으로 보려면:
 
 ```bash
 python -c "import sys;sys.path.insert(0,'tools');import book_ttl_fix as B;from PIL import Image;_,i,_=B.load(96);Image.fromarray((i*17).astype('uint8')).save('ttl96.png')"
 ```
 
-H=96 좌표로 대략 이렇습니다.
+`load(H)` 의 H 는 **한 칸에 들어가는 니블 수**입니다. 이게 구역마다 다릅니다.
+맞지 않으면 잡음으로 보이는데, 그걸 "못 푼 구간"으로 오해하기 쉽습니다.
 
-| x | 내용 |
+| H | 구역 |
 |---|---|
-| ~3300 | キー設定 / 操作設定 / 右利き用・左利き用 |
-| ~3600 | 移動 防御 終了 回復 上空 決定 通常攻撃 必殺攻撃 (전투 명령) |
-| ~3900 | 攻撃 順番 隊長 かばう 通信 / 決定 情報 取消 / LIPS速度 |
-| ~4400 | 続きを始める / 消去する / 複写する / 記録一覧へ→ / 上演時間 |
-| ~5000 | 第四話~第十話 부제 |
-| ~9000 | 전투 지점 이름 58곳 (速攻作戦渋谷, 八葉戦深川 …) |
-| ~12000 | 御柱の間 / ターン / 第一話~最終話 |
+| 48 | 메뉴 문자 (앞쪽) |
+| 64 | 부제가 한 줄인 화 제목 — 1~3화, 11화, 최종회 |
+| 96 | 대부분. **32행 3벌**(보통/선택/강조)이 쌓여 있습니다 |
 
-전부 **32행짜리 같은 문구가 3벌** 쌓여 있습니다 (보통/선택/강조).
-한 벌만 고치면 커서를 올렸을 때 일본어로 돌아갑니다.
+3벌 중 한 벌만 고치면 커서를 올렸을 때 일본어로 돌아갑니다.
+4~10화는 H=96 이지만 3벌이 아니라 **부제 윗줄 / 第N話 / 부제 아랫줄** 입니다.
+같은 높이라도 구역마다 뜻이 다르니 눈으로 확인하세요.
+
+`store` / `unpack` 은 어떤 H 로도 정확한 역변환이라, H=96 으로 고친 뒤
+H=64 로 다시 읽어 이어서 고칠 수 있습니다.
+
+낱말 경계는 **글자 폭이 일정한 것**을 이용해 잡았습니다. 전투 명령은
+10.31px, 전투 지점 이름은 10.72px 격자입니다. 잉크 덩어리 폭을 격자로
+나누면 글자 수가 나오고, 낱말 차례는 ELF 문자열 순서와 맞춰 확정했습니다
+(86낱말 241글자, 덩어리 44개와 정확히 일치).
+
+밑줄(공책 괘선)은 상자 폭을 꽉 채운 행으로 들어 있습니다. **글자와 같이
+지우면 줄이 끊깁니다** — `tools/book_ttl_more.py` 의 `glyph_rows` 가 떼어 냅니다.
 
 `.PVN` 은 타일 배치표입니다 — 32×32 타일, 격자 20×14 → 640×448,
 `0x28` 부터 u32 바이트 오프셋 280개.
