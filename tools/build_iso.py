@@ -99,12 +99,32 @@ def from_dir(table, subdir, label, pattern=None):
     if out: print(f"    {label}: {len(out)}개")
     return out
 
+def from_subdir(table, sub, label):
+    """build/patched/<sub>/ 의 파일을 ISO 경로 중 '/<sub>/' 를 지나는 것에 짝지운다.
+
+    이름이 같은데 내용이 다른 파일이 있어서 필요하다 —
+    SAKURA1/INFO/SK_NEW.PNG 과 SAKURA2/INFO/SK_NEW.PNG 은 그림이 다르다.
+    이름만으로 짝지으면 둘 중 하나가 엉뚱한 그림으로 덮인다.
+    """
+    d = os.path.join(BUILD, "patched", sub)
+    if not os.path.isdir(d): return {}
+    out = {}
+    for fn in sorted(os.listdir(d)):
+        c = [p for p in table if p.rsplit('/', 1)[-1] == fn and f'/{sub}/' in p]
+        if len(c) != 1:
+            sys.exit(f"[{label}] '{sub}/{fn}' 이 ISO 안에 {len(c)}개: {c}")
+        out[c[0]] = os.path.join(d, fn)
+    if out: print(f"    {label}: {len(out)}개")
+    return out
+
 def collect(table, mode):
     rep = dict(FONTS)
     print("교체 대상")
     print(f"    폰트: {len(rep)}개")
     if mode == 'normal':
         rep.update(from_dir(table, "patched", "번역 재삽입"))
+        rep.update(from_subdir(table, "SAKURA1", "세이브 아이콘(1편)"))
+        rep.update(from_subdir(table, "SAKURA2", "세이브 아이콘(2편)"))
     elif mode == 'test':
         rep.update(from_dir(table, ".", "사쿠라1 자", ".PFS"))
     elif mode == 'test2':

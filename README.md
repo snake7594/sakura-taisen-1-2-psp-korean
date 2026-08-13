@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `7597B71E5AEE633CD7B620EC860BE29B` |
-| SHA1 | `F86EB232078DEC77D023DDB993BAE1EE3CC15A1F` |
+| MD5 | `E9C1882572518605197F28397B9772EE` |
+| SHA1 | `FE65003B8528775560E277418A858554ADA36254` |
 
 이 값이 나오면 정상입니다.
 
@@ -91,6 +91,7 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 | 미니게임 | `MG0000DAIF.BIN` 166개 문자열 |
 | 저장 대화상자 | PSP 세이브 유틸리티 문구 — 새 저장 파일 만들기 / 공간 확보를 위해 저장 데이터를 지울까요? / 덮어쓰기 경고문 |
 | 전투 지점 이름 | 중단 기록에 뜨는 58곳 (제극 첫출전, 우구이 대일검전, 무사시 암신위 …) |
+| 세이브 아이콘 | 세이브 목록에 뜨는 144×80 그림 29장 — 제1화~제13화, 전투 중단,<br>시스템 파일, 새 저장 파일 만들기 (`INFO/*.PNG`) |
 | 글꼴 | 나눔스퀘어네오 Bold 를 완성형 2350자로 삽입 |
 
 ### 알려진 한계
@@ -108,6 +109,15 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
   다만 **지명은 자리가 좁아 줄여 썼습니다** — 원문 한자 두 자 자리(21px)에
   한글 세 자를 넣어야 해서 「우구이(鴬谷) 후카가(深川) 이케부(池袋)」 처럼
   됩니다. 원문 한자도 같은 크기의 잔글씨입니다.
+- **아직 일본어인 그림이 남아 있습니다.** 전수조사로 찾아낸 것들입니다.
+
+  | 파일 | 장수 | 내용 |
+  |---|---|---|
+  | `SAKURA2/SLGSIDE/MEIKAN/*.GIM` | 50 | 필살기 이름 세로 배너 (전투 중 표시) |
+  | `SAKURA2/WALL/TTL001~013.GIM` | 13 | 사쿠라2 화 제목 카드 |
+  | `SAKURA2/SAKURA2/E_DODAI1·2.GIM`, `H_DODAI.GIM` | 3 | 전투 연습 성적 화면 |
+  | `.SPR` / `.CG` / `.GMX` | ? | 아직 다 못 훑었습니다 |
+
 - `SLGTAB.PFS` 는 개발용 애니메이션 표 라벨이라 화면에 안 나옵니다. 그대로 뒀습니다.
 - **ISO 안에는 게임이 절대 읽지 않는 자산이 섞여 있습니다.** 아래 5개는
   파일 이름이 ISO 어디에도 안 나옵니다 — 드림캐스트판·3편에서 넘어온
@@ -179,7 +189,7 @@ python tools/elf_text.py
 ELF 안의 하드코딩 문자열을 바꿉니다.
 
 ```bash
-python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/book_ttl_more.py && python tools/book_page_nav.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py && python tools/event_gim.py
+python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/book_ttl_more.py && python tools/book_page_nav.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py && python tools/event_gim.py && python tools/save_icons.py
 ```
 
 메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면, 책 UI 를 다시 그립니다.
