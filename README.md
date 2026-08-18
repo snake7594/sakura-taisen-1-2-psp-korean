@@ -61,8 +61,8 @@ xdelta3 -d -s "Sakura Taisen 1 and 2.iso" "Sakura.Taisen.1.and.2.KR.xdelta" "Sak
 | 항목 | 값 |
 |---|---|
 | 크기 | 1,756,037,120 바이트 (원본과 같음) |
-| MD5 | `8EBC3F3A0C161776F735C1FE9CA2B460` |
-| SHA1 | `AD87F747FA3B9A23E59193D84665AA9A3FAC63D6` |
+| MD5 | `F9999AD222B6E4FBFF1E6B4167C436FF` |
+| SHA1 | `47F25ABF5E27312B12898DBD5D1A97F0228E0818` |
 
 이 값이 나오면 정상입니다.
 
@@ -91,6 +91,11 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 | 미니게임 | `MG0000DAIF.BIN` 166개 문자열 |
 | 저장 대화상자 | PSP 세이브 유틸리티 문구 — 새 저장 파일 만들기 / 공간 확보를 위해 저장 데이터를 지울까요? / 덮어쓰기 경고문 |
 | 전투 지점 이름 | 중단 기록에 뜨는 58곳 (제극 첫출전, 우구이 대일검전, 무사시 암신위 …) |
+| 사쿠라2 화 제목 | 제1화 꽃 피는 제도 ~ 제13화 그대 위해 기적은 울린다 (`WALL/TTL*.GIM`) |
+| 필살기 배너 | 파사검정 앵화무상 등 30장 (`SLGSIDE/MEIKAN/*.GIM`) |
+| 전투 연습 | 성적 화면 3장 (`E_DODAI1·2`, `H_DODAI`) |
+| 사쿠라1 전투 옆창 | 대원 이름표 7장 (`SLGSIDE.SPR`) |
+| 미니게임 UI | 공통 메뉴 21개, 화투 족보 17개, 이름패 16장, 화투 대사 (`MM_FONTA`/`MM_YAKU`/`MC_NAME`/`MC`/`KOIKOI`/`CONTINUE`/`SHINRIAD`) |
 | 세이브 아이콘 | 세이브 목록에 뜨는 144×80 그림 29장 — 제1화~제13화, 전투 중단,<br>시스템 파일, 새 저장 파일 만들기 (`INFO/*.PNG`) |
 | 글꼴 | 나눔스퀘어네오 Bold 를 완성형 2350자로 삽입 |
 
@@ -99,8 +104,9 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 - **일부 자산 이름에 한자가 남아 있으면 엉뚱한 한글로 보입니다.** 글꼴을
   JIS 1수준 한자 자리(ku16~ku40)에 한글로 덮어썼기 때문입니다. 화면에
   나오는 대사에는 해당하지 않습니다.
-- **화 제목** — 사쿠라1 은 한글입니다 (10장). 사쿠라2 는 H.264 PMF 동영상이라
-  재인코딩 + PSMF 리먹스가 필요하고 여유 용량이 없어 일본어로 남습니다.
+- **화 제목** — 사쿠라1 10장, 사쿠라2 13장 모두 한글입니다.
+  사쿠라2 는 동영상인 줄 알았는데 정지 화면 쪽이 편집 가능한 GIM 이었습니다
+  (`WALL/TTL001~013.GIM`). 동영상 자체는 손대지 않았습니다.
 - **사쿠라2 책 UI**(오늘의 일정 / 처음부터·불러오기·중단한 곳부터·옵션 /
   환경 설정 / 세부 설정 / 기록 일람 / 본체·카트리지 RAM /
   추가 시나리오 / VM 사운드 / 기록 이동 / 전투중단기록 /
@@ -113,10 +119,11 @@ PPSSPP 또는 CFW 가 올라간 실기에서 그대로 실행하면 됩니다.
 
   | 파일 | 장수 | 내용 |
   |---|---|---|
-  | `SAKURA2/SLGSIDE/MEIKAN/*.GIM` | 50 | 필살기 이름 세로 배너 (전투 중 표시) |
-  | `SAKURA2/WALL/TTL001~013.GIM` | 13 | 사쿠라2 화 제목 카드 |
-  | `SAKURA2/SAKURA2/E_DODAI1·2.GIM`, `H_DODAI.GIM` | 3 | 전투 연습 성적 화면 |
-  | `.SPR` / `.CG` / `.GMX` | ? | 아직 다 못 훑었습니다 |
+  | `SAKURA1/SAKURA2/SPATACK*.SPR` | 20 | 사쿠라1 필살기 이름 **애니메이션 프레임**.<br>글자가 프레임마다 조각나 날아 들어와서 다시 그리려면<br>연출을 통째로 새로 짜야 합니다. |
+  | `SAKURA1/SAKURA0/OP/KARAOKE.SPR` | 17줄 | 주제가 가라오케 가사 |
+  | `YAKU.SPR` / `MM_BUN.SPR` | 48 | 화투 족보 **설명문** (한 장에 한 문장, 30자 이상) |
+  | `TITLE.SPR` / `TL_ROGO0` / `IC0*.SPR` | 다수 | 「サクラ大戦」 로고. 상표라 그대로 뒀습니다 |
+  | `COOK`/`HANA`/`MAIGO`/`SHOT`/`SLOT`/`SWIM`/`SOUJI`.SPR | 30 | 미니게임 설명 띠 |
 
 - `SLGTAB.PFS` 는 개발용 애니메이션 표 라벨이라 화면에 안 나옵니다. 그대로 뒀습니다.
 - **ISO 안에는 게임이 절대 읽지 않는 자산이 섞여 있습니다.** 아래 5개는
@@ -189,7 +196,7 @@ python tools/elf_text.py
 ELF 안의 하드코딩 문자열을 바꿉니다.
 
 ```bash
-python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/book_ttl_more.py && python tools/book_page_nav.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py && python tools/event_gim.py && python tools/save_icons.py
+python tools/menu_images.py && python tools/map_signs.py && python tools/book_text.py && python tools/book_menu.py && python tools/title_gim.py && python tools/book_ttl.py && python tools/book_ttl_fix.py && python tools/book_ttl_more.py && python tools/book_page_nav.py && python tools/place_gim.py && python tools/ep_title.py && python tools/op_win.py && python tools/event_gim.py && python tools/save_icons.py && python tools/wall_ttl.py && python tools/meikan_gim.py && python tools/dodai_gim.py && python tools/spr_ui.py
 ```
 
 메뉴 이미지, 지도 표지판, 저장 대화상자, 책자형 메뉴 페이지, 사쿠라2 시작 화면, 책 UI 를 다시 그립니다.

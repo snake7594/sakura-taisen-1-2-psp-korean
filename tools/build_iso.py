@@ -125,6 +125,8 @@ def collect(table, mode):
         rep.update(from_dir(table, "patched", "번역 재삽입"))
         rep.update(from_subdir(table, "SAKURA1", "세이브 아이콘(1편)"))
         rep.update(from_subdir(table, "SAKURA2", "세이브 아이콘(2편)"))
+        rep.update(from_subdir(table, "WALL",   "사쿠라2 화 제목 카드"))
+        rep.update(from_subdir(table, "MEIKAN", "필살기 배너"))
     elif mode == 'test':
         rep.update(from_dir(table, ".", "사쿠라1 자", ".PFS"))
     elif mode == 'test2':
